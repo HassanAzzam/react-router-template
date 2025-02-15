@@ -9,13 +9,33 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
+import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import { LogOut } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import type { MetaFunction } from 'react-router'
+import { Link, type LoaderFunctionArgs, type MetaFunction, data, redirect } from 'react-router'
+import { commitSession, getSession } from '~/sessions.server'
 
 export const meta: MetaFunction = () => {
   return [{ title: 'My App' }, { name: 'description', content: 'Welcome to My App!' }]
+}
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const session = await getSession(request.headers.get('Cookie'))
+
+  if (!session.has('userId')) {
+    return redirect('/login')
+  }
+
+  return data(
+    { error: session.get('error') },
+    {
+      headers: {
+        'Set-Cookie': await commitSession(session),
+      },
+    }
+  )
 }
 
 export const handle = {
@@ -48,6 +68,11 @@ export default function _index() {
           <div className="flex items-center gap-2 px-4">
             <DarkModeToggle />
             <LanguageSwitcher />
+            <Button variant="ghost" size="icon">
+              <Link to="/logout">
+                <LogOut className="size-5" />
+              </Link>
+            </Button>
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
