@@ -1,5 +1,5 @@
 {
-    "name": "react-template",
+    "name": "react-router-template",
     "private": true,
     "sideEffects": false,
     "type": "module",
